@@ -10,7 +10,7 @@ import logging
 import traceback
 
 from brain_of_the_doctor import encode_image, analyze_image_with_query
-from voice_of_the_patient import record_audio, transcribe_with_groq
+from voice_of_the_patient import transcribe_with_groq  # record_audio not needed - Gradio handles recording
 from voice_of_the_doctor import text_to_speech_with_gtts, text_to_speech_with_elevenlabs
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

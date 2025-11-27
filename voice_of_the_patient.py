@@ -7,23 +7,41 @@ load_dotenv()
 # load_dotenv()
 
 #Step1: Setup Audio recorder (ffmpeg & portaudio)
-# ffmpeg, portaudio, pyaudio
+# NOTE: record_audio function is not used in deployment - Gradio handles audio recording
+# The imports are optional and only needed if you want to use record_audio locally
+
 import logging
-import speech_recognition as sr
-from pydub import AudioSegment
-from io import BytesIO
+
+# Optional imports for record_audio function (not used in deployment)
+# These are only imported if speech_recognition is available
+try:
+    import speech_recognition as sr
+    from pydub import AudioSegment
+    from io import BytesIO
+    SPEECH_RECOGNITION_AVAILABLE = True
+except ImportError:
+    # speech_recognition not available - this is fine for deployment
+    SPEECH_RECOGNITION_AVAILABLE = False
+    sr = None
+    AudioSegment = None
+    BytesIO = None
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def record_audio(file_path, timeout=20, phrase_time_limit=None):
     """
     Simplified function to record audio from the microphone and save it as an MP3 file.
-
+    NOTE: This function is not used in the deployed app - Gradio handles audio recording.
+    Only available if speech_recognition is installed (for local development).
+    
     Args:
     file_path (str): Path to save the recorded audio file.
     timeout (int): Maximum time to wait for a phrase to start (in seconds).
     phrase_time_lfimit (int): Maximum time for the phrase to be recorded (in seconds).
     """
+    if not SPEECH_RECOGNITION_AVAILABLE:
+        raise ImportError("speech_recognition is not available. This function is not used in deployment.")
+    
     recognizer = sr.Recognizer()
     
     try:
