@@ -22,8 +22,9 @@ def text_to_speech_with_gtts_old(input_text, output_filepath):
     audioobj.save(output_filepath)
 
 
-input_text="Hi this is Ai with Hassan!"
-text_to_speech_with_gtts_old(input_text=input_text, output_filepath="gtts_testing.mp3")
+# Commented out - this was running at module import time
+# input_text="Hi this is Ai with Hassan!"
+# text_to_speech_with_gtts_old(input_text=input_text, output_filepath="gtts_testing.mp3")
 
 #Step1b: Setup Text to Speech–TTS–model with ElevenLabs
 import elevenlabs
@@ -49,35 +50,29 @@ import subprocess
 import platform
 
 def text_to_speech_with_gtts(input_text, output_filepath):
+    import time
     language="en"
-    
-    # Change the output to .wav instead of .mp3
-    wav_filepath = output_filepath.replace('.mp3', '.wav')
     
     audioobj = gTTS(
         text=input_text,
         lang=language,
         slow=False
     )
-    # First save as mp3
+    # Save as mp3 (Gradio can handle MP3 files directly)
     audioobj.save(output_filepath)
     
-    # Convert mp3 to wav using pydub
-    audio = AudioSegment.from_mp3(output_filepath)
-    audio.export(wav_filepath, format="wav")
+    # Ensure file is fully written and flushed to disk
+    import os
+    if os.path.exists(output_filepath):
+        # Wait a moment to ensure file is fully written
+        time.sleep(0.1)
+        # Verify file size is reasonable (not 0 bytes)
+        file_size = os.path.getsize(output_filepath)
+        if file_size == 0:
+            raise Exception(f"Audio file {output_filepath} is empty (0 bytes)")
     
-    os_name = platform.system()
-    try:
-        if os_name == "Darwin":  # macOS
-            subprocess.run(['afplay', wav_filepath])
-        elif os_name == "Windows":  # Windows
-            subprocess.run(['powershell', '-c', f'(New-Object Media.SoundPlayer "{wav_filepath}").PlaySync();'])
-        elif os_name == "Linux":  # Linux
-            subprocess.run(['aplay', wav_filepath])
-        else:
-            raise OSError("Unsupported operating system")
-    except Exception as e:
-        print(f"An error occurred while trying to play the audio: {e}")
+    # Skip the WAV conversion and playback - Gradio will handle MP3 directly
+    # This avoids the ERR_CONTENT_LENGTH_MISMATCH error
     
     return output_filepath  # Return the mp3 file for gradio
 
